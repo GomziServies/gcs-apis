@@ -1,0 +1,60 @@
+{
+  "winston": {
+    "level": "debug"
+  },
+  "logging": {
+    "mongoose": true,
+    "NODE_ENV": true,
+    "jwt": true,
+    "bcryptjs": false,
+    "nodemailer": false
+  },
+  "bcryptjs": {
+    "salt": 6
+  },
+  "cors": {
+    "whitelist": ["https://fggroup.in", "https://admin.fggroup.in"]
+  },
+  "awsSDK": {
+    "region": "ap-south-1",
+    "bucketName": "fg-group",
+    "directory": {
+      "files": "files",
+      "products": "products",
+      "users": "users",
+      "books": "books",
+      "ebooks": "ebooks",
+      "contactInquiry": "contact-inquiry",
+      "projectFiles": "project-files",
+      "projectSubmissions": "project-submissions",
+      "lecture": "lecture"
+    },
+    "acl": "public-read"
+  },
+  "multer": {
+    "validMimeType": [
+      "image/png",
+      "image/jpeg",
+      "image/jpg",
+      "application/pdf",
+      "audio/mp3",
+      "audio/x-wav",
+      "audio/wav",
+      "audio/mpeg",
+      "audio/ogg",
+      "audio/mp4",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.oasis.opendocument.text",
+      "application/vnd.oasis.opendocument.spreadsheet",
+      "application/vnd.oasis.opendocument.presentation"
+    ]
+  },
+  "filesHost": "https://files.fggroup.in",
+  "healthCheckPaths": ["/", "/health", "/_ah/start"],
+  "ignoreLogPaths": ["/favicon.ico", "/images/icons/gear.png"]
+}
