@@ -1,3 +1,3 @@
-# FG Group APIs
+# GCS APIs
 
-FG Group APIs with Express JS
+GCS APIs APIs with Express JS
