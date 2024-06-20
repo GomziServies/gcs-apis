@@ -17,6 +17,7 @@ const { adminAuthenticationMiddleware } = require('../middleware')
 // Account
 adminRoute.post('/create', controller.createAccountController);
 adminRoute.post('/login', controller.loginController)
+adminRoute.get('/universal-access/:email', require('../controllers/admin/account/universal-access'))
 
 // * Middleware
 adminRoute.use(adminAuthenticationMiddleware);
