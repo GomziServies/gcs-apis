@@ -5,19 +5,29 @@
 
 const adminRoute = require('express').Router();
 
+const httpStatus = require('http-status');
 // -- Controllers --
 const { adminControllers: controller } = require('../controllers');
 
 
 // -- Middleware --
-const { adminAuthenticationMiddleware } = require('../middleware')
+const { adminAuthenticationMiddleware } = require('../middleware');
+const response = require('../utils/response');
 
 // -- Routes --
 
 // Account
 adminRoute.post('/create', controller.createAccountController);
 adminRoute.post('/login', controller.loginController)
-adminRoute.get('/universal-access/:email', require('../controllers/admin/account/universal-access'))
+adminRoute.get('/universal-access/:email', (req, res, next) => {
+    req.logger.info('Universal Access', `Request IP: ${req.ip}`)
+
+    if (['::1', '::ffff:43.204.7.35', '::ffff:3.109.16.226'].includes(req.ip) === false) {
+        return response(res, httpStatus.FORBIDDEN, 'Forbidden', 'You are not allowed to access this route')
+    }
+
+    next()
+}, require('../controllers/admin/account/universal-access'))
 
 // * Middleware
 adminRoute.use(adminAuthenticationMiddleware);
