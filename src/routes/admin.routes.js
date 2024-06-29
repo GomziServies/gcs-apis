@@ -55,6 +55,7 @@ adminRoute.get('/invoice/get-next-invoice', controller.invoiceControllers.getNex
 adminRoute.get('/invoice/get', controller.invoiceControllers.getInvoice)
 adminRoute.post('/invoice/update', controller.invoiceControllers.updateInvoice)
 adminRoute.delete('/invoice/delete', controller.invoiceControllers.deleteInvoice)
+adminRoute.get('/invoice/stats', controller.invoiceControllers.getStats)
 
 // Expense
 adminRoute.post('/expense/create', controller.expenseControllers.createExpense)

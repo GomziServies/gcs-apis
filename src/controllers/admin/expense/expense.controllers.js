@@ -91,14 +91,14 @@ module.exports.getExpense = async (req, res) => {
         let findQuery = {}
 
         if (id) {
-            if (!ObjectId.isValid(id)) {
-                return response(res, httpStatus.BAD_REQUEST, 'Expense expense id.');
+            if (!ObjectId.isValid(req.query.id)) {
+                return response(res, httpStatus.BAD_REQUEST, 'Invalid invoice id.');
             }
 
-            findQuery._id = new ObjectId(id)
+            findQuery._id = new ObjectId(req.query.id)
         }
 
-        const SearchFields = ['expense_number', 'expenseName', 'expensePaymentMethod']
+        const SearchFields = ['_id', 'expense_number', 'expenseName', 'expensePaymentMethod']
         Object.assign(findQuery, MongoDBQueryBuilder.searchTextQuery(req.query.search, SearchFields))
 
         const pagination = PaginationHelper.getPagination(req.query);

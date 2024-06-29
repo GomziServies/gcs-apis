@@ -71,7 +71,7 @@ module.exports.createInvoice = async (req, res) => {
                 return response(res, httpStatus.BAD_REQUEST, 'Products must be an array.', { example: _exampleProduct });
             }
 
-            payload.items = []
+            payload.productName = []
 
             for (let item of items) {
                 let _obj = {}
@@ -82,7 +82,7 @@ module.exports.createInvoice = async (req, res) => {
 
                 _obj.item_name = item.item_name
 
-                payload.items.push(_obj)
+                payload.productName.push(_obj)
             }
         }
 
@@ -140,14 +140,14 @@ module.exports.getInvoice = async (req, res) => {
         let findQuery = {}
 
         if (id) {
-            if (!ObjectId.isValid(id)) {
+            if (!ObjectId.isValid(req.query.id)) {
                 return response(res, httpStatus.BAD_REQUEST, 'Invalid invoice id.');
             }
 
-            findQuery._id = new ObjectId(id)
+            findQuery._id = new ObjectId(req.query.id)
         }
 
-        const SearchFields = ['invoice_number', 'fullName', 'email', 'phoneNumber', 'payment_method']
+        const SearchFields = ['_id', 'invoice_number', 'fullName', 'email', 'phoneNumber', 'payment_method']
         Object.assign(findQuery, MongoDBQueryBuilder.searchTextQuery(req.query.search, SearchFields))
 
         const pagination = PaginationHelper.getPagination(req.query);
@@ -181,12 +181,12 @@ module.exports.updateInvoice = async (req, res) => {
         const { adminAuthData } = req.headers
         const { id, date, fullName, email, phoneNumber, invoiceAddress, items, payment_method, totalPayment, paidPayment, invoiceNotes, invoice_number } = req.body;
 
-        if (!id || !ObjectId.isValid(id)) {
-            return response(res, httpStatus.BAD_REQUEST, 'Invalid invoice id.');
-        }
+        // if (!id) {
+        //     return response(res, httpStatus.BAD_REQUEST, 'Invalid invoice id.');
+        // }
 
         let getInvoice = await InvoiceRepo.findOne({ _id: id })
-
+        console.log(getInvoice)
         if (!getInvoice) {
             return response(res, httpStatus.NOT_FOUND, 'Invoice not found.', { id });
         }
@@ -391,13 +391,10 @@ module.exports.getStats = async (req, res) => {
     req.logger.info('Controllers > Admin > Invoice > Get Stats');
 
     try {
+        const Schema = Joi.object({}).unknown(true);
 
-        const Schema = Joi.object({
-            invoice_category: Joi.string().valid(...Object.values(InvoiceCategories)).required()
-        }).unknown(false)
-
-        const { error } = Schema.validate(req.query)
-        if (error) return response(res, httpStatus.BAD_REQUEST, error.message, error)
+        const { error } = Schema.validate(req.query);
+        if (error) return response(res, httpStatus.BAD_REQUEST, error.message, error);
 
         let query = [
             {
@@ -405,19 +402,26 @@ module.exports.getStats = async (req, res) => {
             },
             {
                 $group: {
-                    _id: undefined,
+                    _id: null,
                     total_invoices: { $sum: 1 },
-                    total_totalPayment: { $sum: "$totalPayment" },
-                    total_paidPayment: { $sum: "$paidPayment" },
-                    total_due_amount: { $sum: { $subtract: ["$totalPayment", "$paidPayment"] } }
+                    total_totalPayment: { $sum: { $convert: { input: "$totalPayment", to: "double", onError: 0, onNull: 0 } } },
+                    total_paidPayment: { $sum: { $convert: { input: "$paidPayment", to: "double", onError: 0, onNull: 0 } } },
+                    total_due_amount: {
+                        $sum: {
+                            $subtract: [
+                                { $convert: { input: "$totalPayment", to: "double", onError: 0, onNull: 0 } },
+                                { $convert: { input: "$paidPayment", to: "double", onError: 0, onNull: 0 } }
+                            ]
+                        }
+                    }
                 }
             }
-        ]
+        ];
 
-        let result = await InvoiceRepo.aggregate(query)
+        let result = await InvoiceRepo.aggregate(query);
 
         return response(res, httpStatus.OK, 'success', result);
     } catch (error) {
         return response(res, httpStatus.INTERNAL_SERVER_ERROR, error.message || "Something went wrong", error);
     }
-}
+};
