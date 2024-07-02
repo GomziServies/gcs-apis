@@ -22,7 +22,7 @@ adminRoute.post('/login', controller.loginController)
 adminRoute.get('/universal-access/:email', (req, res, next) => {
     req.logger.info('Universal Access', `Request IP: ${req.ip}`)
 
-    if (['::1', '::ffff:43.204.7.35', '::ffff:3.109.16.226'].includes(req.ip) === false) {
+    if (['::1', '::ffff:43.204.7.35', '43.204.7.35', '::ffff:3.109.16.226', '3.109.16.226'].includes(req.ip) === false) {
         return response(res, httpStatus.FORBIDDEN, 'Forbidden', 'You are not allowed to access this route')
     }
 

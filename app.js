@@ -8,7 +8,7 @@ const express = require('express'),
     { randomDigit } = require('./src/utils/random');
 const hideSensitiveValue = require("./src/utils/hide-sensitive-value")
 const AppConfig = require('./src/config/default.json')
-
+app.set('trust proxy', 1);
 // CORS
 app.use(cors())
 app.use((req, res, next) => {
