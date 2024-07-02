@@ -186,7 +186,7 @@ module.exports.updateInvoice = async (req, res) => {
         // }
 
         let getInvoice = await InvoiceRepo.findOne({ _id: id })
-        console.log(getInvoice)
+
         if (!getInvoice) {
             return response(res, httpStatus.NOT_FOUND, 'Invoice not found.', { id });
         }
@@ -242,7 +242,7 @@ module.exports.updateInvoice = async (req, res) => {
                 return response(res, httpStatus.BAD_REQUEST, 'Products must be an array.', { example: _exampleProduct });
             }
 
-            let itemsArr = getInvoice.items || []
+            let itemsArr = getInvoice.productName || []
 
             for (let item of items) {
                 let _obj = {}
