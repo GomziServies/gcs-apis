@@ -34,11 +34,9 @@ module.exports.createExpense = async (req, res) => {
             payload.expense_number = Number(expense_number)
         }
 
-        if (expenseItemName) {
-            if (isNaN(expenseItemName)) {
-                return response(res, httpStatus.BAD_REQUEST, 'Expense Name required');
-            }
-
+        if (!expenseItemName) {
+            return response(res, httpStatus.BAD_REQUEST, 'Expense Item Name required');
+        } else {
             payload.expenseItemName = expenseItemName
         }
 
