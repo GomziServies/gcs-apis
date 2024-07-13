@@ -16,6 +16,9 @@ const MongooseSchema = new mongoose.Schema({
     invoiceAddress: { type: String, required, trim },
     productName: [{
         item_name: { type: String, required, trim },
+        amount: { type: Number, trim },
+        totalAmount: { type: Number, trim },
+        quantity: { type: Number, trim, default: 1 },
     }],
     bank_details: {
         account_type: { type: String, trim },
@@ -24,9 +27,10 @@ const MongooseSchema = new mongoose.Schema({
         branch_code: { type: String, trim },
     },
     payment_method: { type: String },
-    totalPayment: { type: Number, required, trim },
+    totalPayment: { type: Number, trim },
     paidPayment: { type: Number, trim },
     invoiceNotes: { type: String, trim },
+    termCondition: { type: String, trim },
     createdById: { type: ObjectId, trim },
     updatedById: { type: ObjectId, trim },
 }, {

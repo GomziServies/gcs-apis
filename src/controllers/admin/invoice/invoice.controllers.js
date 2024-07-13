@@ -10,14 +10,14 @@ const { ObjectId } = require('mongoose').Types
 const Joi = require('joi');
 
 
-let _exampleProduct = [{ item_name: "Example Product" }]
+let _exampleProduct = [{ item_name: "Example Product", amount: 1000, totalAmount: 2000, quantity: 2 }]
 
 module.exports.createInvoice = async (req, res) => {
     req.logger.info('Controllers > Admin > Invoice > Create Invoice');
 
     try {
         const { adminAuthData } = req.headers
-        const { date, fullName, email, phoneNumber, invoiceAddress, items, payment_method, totalPayment, paidPayment, invoiceNotes, invoice_number } = req.body;
+        const { date, fullName, email, phoneNumber, invoiceAddress, items, paidPayment, invoiceNotes, invoice_number, termCondition, totalPayment, payment_method } = req.body;
 
         let payload = {
             createdById: adminAuthData.id,
@@ -79,8 +79,20 @@ module.exports.createInvoice = async (req, res) => {
                 if (!item.item_name) {
                     return response(res, httpStatus.BAD_REQUEST, 'Item name is required.', { example: _exampleProduct });
                 }
+                if (!item.amount) {
+                    return response(res, httpStatus.BAD_REQUEST, 'Item Amount is required.', { example: _exampleProduct });
+                }
+                if (!item.totalAmount) {
+                    return response(res, httpStatus.BAD_REQUEST, 'Item Total Amount is required.', { example: _exampleProduct });
+                }
+                if (!item.quantity) {
+                    return response(res, httpStatus.BAD_REQUEST, 'Item Quantity is required.', { example: _exampleProduct });
+                }
 
                 _obj.item_name = item.item_name
+                _obj.amount = item.amount
+                _obj.totalAmount = item.totalAmount
+                _obj.quantity = item.quantity
 
                 payload.productName.push(_obj)
             }
@@ -116,6 +128,9 @@ module.exports.createInvoice = async (req, res) => {
 
         if (invoiceNotes) {
             payload.invoiceNotes = String(invoiceNotes).trim()
+        }
+        if (termCondition) {
+            payload.termCondition = String(termCondition).trim()
         }
 
         return InvoiceRepo
@@ -180,10 +195,6 @@ module.exports.updateInvoice = async (req, res) => {
     try {
         const { adminAuthData } = req.headers
         const { id, date, fullName, email, phoneNumber, invoiceAddress, items, payment_method, totalPayment, paidPayment, invoiceNotes, invoice_number } = req.body;
-
-        // if (!id) {
-        //     return response(res, httpStatus.BAD_REQUEST, 'Invalid invoice id.');
-        // }
 
         let getInvoice = await InvoiceRepo.findOne({ _id: id })
 
@@ -267,8 +278,21 @@ module.exports.updateInvoice = async (req, res) => {
                 if (!item.item_name) {
                     return response(res, httpStatus.BAD_REQUEST, 'Item name is required.', { example: _exampleProduct });
                 }
+                if (!item.amount) {
+                    return response(res, httpStatus.BAD_REQUEST, 'Item Amount is required.', { example: _exampleProduct });
+                }
+                if (!item.totalAmount) {
+                    return response(res, httpStatus.BAD_REQUEST, 'Item Total Amount is required.', { example: _exampleProduct });
+                }
+                if (!item.quantity) {
+                    return response(res, httpStatus.BAD_REQUEST, 'Item Quantity is required.', { example: _exampleProduct });
+                }
 
                 _obj.item_name = item.item_name
+                _obj.amount = item.amount
+                _obj.totalAmount = item.totalAmount
+                _obj.quantity = item.quantity
+
                 if (index !== -1) {
                     itemsArr[index] = _obj
                 } else {
