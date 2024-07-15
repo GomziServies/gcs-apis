@@ -302,7 +302,7 @@ module.exports.updateInvoice = async (req, res) => {
 
             if (itemsArr.length === 0) return response(res, httpStatus.BAD_REQUEST, 'At least one item is required.', { example: _exampleProduct });
 
-            getInvoice.set('items', itemsArr)
+            getInvoice.set('productName', itemsArr)
         }
 
         if (!payment_method) {
