@@ -34,6 +34,9 @@ adminRoute.use(adminAuthenticationMiddleware);
 
 // -- Authorized Routes --
 
+// Insights
+adminRoute.use('/insights', require('../controllers/admin/insights/insights.routes'));
+
 // Account
 adminRoute.post('/create-admin', controller.createAccountController);
 adminRoute.get('/get-profile', controller.getProfileController)

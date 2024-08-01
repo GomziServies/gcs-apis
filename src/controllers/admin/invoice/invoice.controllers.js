@@ -8,6 +8,7 @@ const { regexValidateUtil } = require('../../../utils');
 const { isArray, isObject, isNumber, isUndefined, pickBy } = require('lodash');
 const { ObjectId } = require('mongoose').Types
 const Joi = require('joi');
+const { JoiObjectIdValidator } = require('../../../helpers/joi-custom-validators.helpers');
 
 
 let _exampleProduct = [{ item_name: "Example Product", amount: 1000, totalAmount: 2000, quantity: 2 }]
@@ -150,19 +151,55 @@ module.exports.getInvoice = async (req, res) => {
     req.logger.info('Controllers > Admin > Invoice > Get Invoice');
 
     try {
-        const { id } = pickBy(req.query);
+        req.query = pickBy(req.query, (value => value !== ''));
 
         let findQuery = {}
 
-        if (id) {
+        const ValidationSchema = Joi.object({
+            id: Joi.string().custom(JoiObjectIdValidator).optional(),
+            unpaid_only: Joi.boolean().optional(),
+            paid_only: Joi.boolean().optional(),
+            from_date: Joi.date().optional(),
+            to_date: Joi.date().optional(),
+            search: Joi.string().optional(),
+            sort: Joi.string().optional(),
+            sortOrder: Joi.string().optional(),
+            limit: Joi.number().optional(),
+            page: Joi.number().optional(),
+            skip: Joi.number().optional(),
+        })
+
+        const { error, value } = ValidationSchema.validate(req.query, { stripUnknown: true, convert: true })
+        if (error) return response(res, error)
+        else req.query = value
+
+        if (req.query.id) {
             if (!ObjectId.isValid(req.query.id)) {
                 return response(res, httpStatus.BAD_REQUEST, 'Invalid invoice id.');
             }
 
-            findQuery._id = new ObjectId(req.query.id)
+            findQuery._id = ObjectId.createFromHexString(req.query.id)
         }
 
-        const SearchFields = ['_id', 'invoice_number', 'fullName', 'email', 'phoneNumber', 'payment_method']
+        if (req.query.from_date || req.query.to_date) {
+            findQuery.date = {}
+
+            if (req.query.from_date) {
+                findQuery.date.$gte = req.query.from_date
+            }
+
+            if (req.query.to_date) {
+                findQuery.date.$lte = req.query.to_date
+            }
+        }
+
+        if (req.query.unpaid_only) {
+            findQuery.$expr = { $lt: ['$paid_amount', '$totalPayment'] }
+        } else if (req.query.paid_only) {
+            findQuery.$expr = { $eq: ['$paid_amount', '$paidPayment'] }
+        }
+
+        const SearchFields = ['_id', 'invoice_number', 'name', 'email', 'mobile', 'payment_method', 'items[].item_name']
         Object.assign(findQuery, MongoDBQueryBuilder.searchTextQuery(req.query.search, SearchFields))
 
         const pagination = PaginationHelper.getPagination(req.query);

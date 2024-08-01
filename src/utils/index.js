@@ -10,6 +10,7 @@ module.exports.timeUtil = require('./time-validation')
 module.exports.responseUtil = require('./response')
 module.exports.replaceAll = require('./replaceAll')
 module.exports.hideSensitiveValue = require('./hide-sensitive-value')
+module.exports.getLoggerInstance = require('./find-parent-logger')
 
 /**
  * 

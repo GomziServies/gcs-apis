@@ -7,6 +7,7 @@ const { DayJS } = require('../../../services');
 const { isNumber, isUndefined, pickBy } = require('lodash');
 const { ObjectId } = require('mongoose').Types
 const Joi = require('joi');
+const { JoiObjectIdValidator } = require('../../../helpers/joi-custom-validators.helpers');
 
 module.exports.createExpense = async (req, res) => {
     req.logger.info('Controllers > Admin > Expense > Create Expense');
@@ -84,19 +85,47 @@ module.exports.getExpense = async (req, res) => {
     req.logger.info('Controllers > Admin > Expense > Get Expense');
 
     try {
-        const { id } = pickBy(req.query);
+        req.query = pickBy(req.query, (value => value !== ''));
 
         let findQuery = {}
 
-        if (id) {
+        const ValidationSchema = Joi.object({
+            id: Joi.string().custom(JoiObjectIdValidator).optional(),
+            from_date: Joi.date().optional(),
+            to_date: Joi.date().optional(),
+            search: Joi.string().optional(),
+            sort: Joi.string().optional(),
+            sortOrder: Joi.string().optional(),
+            limit: Joi.number().optional(),
+            page: Joi.number().optional(),
+            skip: Joi.number().optional(),
+        })
+
+        const { error, value } = ValidationSchema.validate(req.query, { stripUnknown: true, convert: true })
+        if (error) return response(res, error)
+        else req.query = value
+
+        if (req.query.id) {
             if (!ObjectId.isValid(req.query.id)) {
-                return response(res, httpStatus.BAD_REQUEST, 'Invalid invoice id.');
+                return response(res, httpStatus.BAD_REQUEST, 'Invalid Expense id.');
             }
 
-            findQuery._id = new ObjectId(req.query.id)
+            findQuery._id = ObjectId.createFromHexString(req.query.id)
         }
 
-        const SearchFields = ['_id', 'expense_number', 'expenseName', 'expensePaymentMethod']
+        if (req.query.from_date || req.query.to_date) {
+            findQuery.date = {}
+
+            if (req.query.from_date) {
+                findQuery.date.$gte = req.query.from_date
+            }
+
+            if (req.query.to_date) {
+                findQuery.date.$lte = req.query.to_date
+            }
+        }
+
+        const SearchFields = ['_id', 'expense_number', 'payment_method', 'expenseName']
         Object.assign(findQuery, MongoDBQueryBuilder.searchTextQuery(req.query.search, SearchFields))
 
         const pagination = PaginationHelper.getPagination(req.query);

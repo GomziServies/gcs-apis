@@ -14,7 +14,7 @@ const MongooseSchema = new mongoose.Schema({
     expensePaymentMethod: { type: String },
     expenseItemName: { type: String, required, trim },
     expenseNotes: { type: String, trim },
-    expenseAmount: { type: String, required, trim },
+    expenseAmount: { type: Number, required, trim },
     createdById: { type: ObjectId, trim },
     updatedById: { type: ObjectId, trim },
 }, {
